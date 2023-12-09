@@ -1,0 +1,9 @@
+Python 3.10.13
+No LSB modules are available.
+Distributor ID: Ubuntu
+Description:    Ubuntu 20.04.6 LTS
+Release:        20.04
+Codename:       focal
+whoami geoi
+web imerla1.github.com
+
