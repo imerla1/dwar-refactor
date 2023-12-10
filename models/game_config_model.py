@@ -1,5 +1,5 @@
 from pydantic import BaseModel, HttpUrl, EmailStr, SecretStr
-from typing import List, Dict
+from typing import List, Dict, Optional
 
 
 class GameCommonParams(BaseModel):
@@ -17,7 +17,7 @@ class PlayerParams(BaseModel):
     nickname: str
     username: EmailStr
     password: SecretStr
-    srv: str
+    srv: Optional[str]
 
 
 class AppConfig(BaseModel):
