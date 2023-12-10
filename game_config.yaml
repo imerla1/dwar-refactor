@@ -1,3 +1,0 @@
-common:
-  respawn_request: https://w1.dwar.ru/action_run.php?code=RESURRECT&url_success=area.php&url_error=area.php&in[mode_id]=1
-  server_url: 
