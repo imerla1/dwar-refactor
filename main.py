@@ -9,5 +9,3 @@ user = game_config.users.get(prompted_user)
 assert user is not None, f"{prompted_user} not found"
 
 
-effects = get_user_effects(main_logger, "_-RUS-s_", user.cookie)
-print(effects)
