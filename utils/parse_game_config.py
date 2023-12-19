@@ -1,6 +1,6 @@
 import logging
 import yaml
-from models import AppConfig
+from schemas import AppConfig
 
 
 def parse_game_config(logger: logging.Logger, file_path: str):
