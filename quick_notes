@@ -1,1 +1,2 @@
 parent.chat.chatUpdateUsers() - update chat users in location (in chat frame)
+canvas.app.battle.Const.MAX_ANIMATION_SIZE in canvas.js to access max_animation_size which will participate into generating SIGNATURE.
