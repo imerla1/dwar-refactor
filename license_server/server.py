@@ -8,7 +8,10 @@ import utils
 import schemas
 from pydantic import BaseModel
 from jose import jwt
+from jose.exceptions import JWTError
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 # create all models
 models.Base.metadata.create_all(bind=engine)
@@ -35,8 +38,7 @@ TRIAL_PERIOD_DELTA = timedelta(days=1)
 class LicenseKeyRequestParam(BaseModel):
     license_key: str
 
-class VerifySessionParams(LicenseKeyRequestParam):
-    session_id: str
+
 
 
 @app.post("/{trial}", response_model=schemas.LicenseKeySchema)
@@ -80,10 +82,28 @@ async def verify_license(request_body: LicenseKeyRequestParam, db: Session = Dep
         return {
             "token": token
         }
-    return HTTPException(
+    raise HTTPException(
         status_code=status.HTTP_400_BAD_REQUEST,
         detail="The license key provided is not valid. Please check and try again."
     )
 
-# @app.post("/verification/session")
-# async
+
+@app.get("/verify/session")
+async def verify_session(q: str, db: Session = Depends(get_db)):
+    jwt_token = q
+    try:
+        decoded_token = jwt.decode(jwt_token, SECRET_KEY, algorithms=[ALGORITHM])
+        license_key = decoded_token.get("sub")
+        license_record = db.query(LicenseModel).filter_by(license_key=license_key).first()
+    except JWTError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
+        )
+    if license_record:
+        server_session_id = license_record.session_id
+        client_session_id = decoded_token.get("session_id")
+        if server_session_id == client_session_id:
+            return "OK"
+        else:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid Session id")
+    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="invalid License key")
