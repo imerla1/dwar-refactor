@@ -1,6 +1,7 @@
 from database import Base
 from enum import Enum
 from sqlalchemy import Boolean, Column, Integer, String,DateTime , Enum as SQLAlchemyEnum
+from sqlalchemy.sql import func
 
 class LicenseTypeEnum(Enum):
     FULL = 'full'
@@ -14,5 +15,5 @@ class LicenseModel(Base):
     key_expires_at = Column(DateTime, nullable=True)
     session_id = Column(String, unique=True, nullable=True)
     recovery_key = Column(String, unique=False, nullable=True)
-
+    created_at = Column(DateTime, nullable=False, default=func.now())
 
