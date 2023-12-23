@@ -8,6 +8,7 @@ import schemas
 from pydantic import BaseModel
 from jose import jwt
 from jose.exceptions import JWTError
+from basic_auth import basic_auth_guard
 
 
 # create all models
@@ -102,15 +103,15 @@ class LicenseController:
 
 license_controller = LicenseController()
 
-@app.post("/{trial}", response_model=schemas.LicenseKeySchema)
-async def create_license_key(trial: bool = False, recovery_key: str = None, db: Session = Depends(get_db)):
+@app.post("/generate/license_key", response_model=schemas.LicenseKeySchema)
+async def create_license_key(trial: bool = False, recovery_key: str = None, db: Session = Depends(get_db), auth=Depends(basic_auth_guard)):
     return license_controller.create_license_data(trial, recovery_key, db)
 
 @app.post("/verify/key")
-async def verify_license(request_body: LicenseKeyRequestParam, db: Session = Depends(get_db)):
+async def verify_license(request_body: LicenseKeyRequestParam, db: Session = Depends(get_db), auth=Depends(basic_auth_guard)):
     return license_controller.verify_license_key(request_body.license_key, db)
 
 @app.get("/verify/session")
-async def verify_session(authorization: str = Header(...), db: Session = Depends(get_db)):
-    jwt_token = authorization.split(" ")[-1]
-    return license_controller.verify_session(jwt_token, db)
+async def verify_session(x_jwt_token: str = Header(...), db: Session = Depends(get_db), auth=Depends(basic_auth_guard)):
+    
+    return license_controller.verify_session(x_jwt_token, db)
