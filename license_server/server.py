@@ -8,9 +8,7 @@ import schemas
 from pydantic import BaseModel
 from jose import jwt
 from jose.exceptions import JWTError
-from fastapi.security import OAuth2PasswordBearer
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 # create all models
 models.Base.metadata.create_all(bind=engine)
