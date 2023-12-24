@@ -115,3 +115,4 @@ async def verify_license(request_body: LicenseKeyRequestParam, db: Session = Dep
 async def verify_session(x_jwt_token: str = Header(...), db: Session = Depends(get_db), auth=Depends(basic_auth_guard)):
     
     return license_controller.verify_session(x_jwt_token, db)
+
