@@ -10,7 +10,6 @@ from jose import jwt
 from jose.exceptions import JWTError
 from basic_auth import basic_auth_guard
 
-
 # create all models
 models.Base.metadata.create_all(bind=engine)
 
@@ -18,6 +17,7 @@ app = FastAPI(
     title="DWAR License Server",
     version="0.1.0"
 )
+
 
 # Dependency
 def get_db():
@@ -33,10 +33,9 @@ ALGORITHM = "HS256"
 # Trial License Period 1 day
 TRIAL_PERIOD_DELTA = timedelta(days=1)
 
+
 class LicenseKeyRequestParam(BaseModel):
     license_key: str
-
-
 
 
 class LicenseController:
@@ -101,18 +100,21 @@ class LicenseController:
 
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid License key")
 
+
 license_controller = LicenseController()
 
+
 @app.post("/generate/license_key", response_model=schemas.LicenseKeySchema)
-async def create_license_key(trial: bool = False, recovery_key: str = None, db: Session = Depends(get_db), auth=Depends(basic_auth_guard)):
+async def create_license_key(trial: bool = False, recovery_key: str = None, db: Session = Depends(get_db),
+                             auth=Depends(basic_auth_guard)):
     return license_controller.create_license_data(trial, recovery_key, db)
 
+
 @app.post("/verify/key")
-async def verify_license(request_body: LicenseKeyRequestParam, db: Session = Depends(get_db), auth=Depends(basic_auth_guard)):
+async def verify_license(request_body: LicenseKeyRequestParam, db: Session = Depends(get_db)):
     return license_controller.verify_license_key(request_body.license_key, db)
 
-@app.get("/verify/session")
-async def verify_session(x_jwt_token: str = Header(...), db: Session = Depends(get_db), auth=Depends(basic_auth_guard)):
-    
-    return license_controller.verify_session(x_jwt_token, db)
 
+@app.get("/verify/session")
+async def verify_session(x_jwt_token: str = Header(...), db: Session = Depends(get_db)):
+    return license_controller.verify_session(x_jwt_token, db)
