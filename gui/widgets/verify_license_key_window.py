@@ -46,20 +46,21 @@ class LicenseKeyVerificationWidget(QWidget):
 
     def verify_license_key(self):
         db = SessionLocal()
-        license_key = self.license_key_input.text()
+        license_key_input = self.license_key_input.text()
         try:
-            server_response_token = server_verify_license_key.verify_license_key(self.license_server_url, license_key)
+            server_response_token = server_verify_license_key.verify_license_key(self.license_server_url,
+                                                                                 license_key_input)
             token_in_db = db.query(TokenModel).filter_by().first()
             if token_in_db:
-                token = secure_crypto.decrypt(token_in_db.token)
-                print(token)
-            if not token_in_db:
-                encrypted_token = secure_crypto.encrypt(server_response_token)
-                print(encrypted_token)
-                token = TokenModel(token=encrypted_token)
-                print(token.token)
-                db.add(token)
+                db.delete(token_in_db)
                 db.commit()
+
+
+            encrypted_token = secure_crypto.encrypt(server_response_token)
+            token = TokenModel(token=encrypted_token)
+            print(token.token)
+            db.add(token)
+            db.commit()
         except Exception as e:
             self.show_error_message(str(e))
 
