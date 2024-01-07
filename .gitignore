@@ -156,4 +156,4 @@ cython_debug/
 
 *.explore.*
 .idea
-game_config.yaml
+gui/game_config.yaml
