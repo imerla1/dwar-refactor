@@ -104,6 +104,12 @@ class LicenseController:
 license_controller = LicenseController()
 
 
+# TODO add more advanced health check
+@app.get("/health")
+async def health_check():
+    return "OK"
+
+
 @app.post("/generate/license_key", response_model=schemas.LicenseKeySchema)
 async def create_license_key(trial: bool = False, recovery_key: str = None, db: Session = Depends(get_db),
                              auth=Depends(basic_auth_guard)):
