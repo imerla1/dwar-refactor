@@ -1,63 +1,68 @@
-import sys
-from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QMessageBox
+from PyQt5.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QMessageBox
+from PyQt5.QtGui import QFont
+from utils import verify_license_key as server_verify_license_key
+from models.token_model import TokenModel
+from database import SessionLocal
+from globals import secure_crypto
+from utils.token_manager import fetch_jwt_token
 
-class LicenseKeyWindow(QWidget):
+
+
+class LicenseKeyVerificationWidget(QWidget):
     def __init__(self):
         super().__init__()
 
-        self.setWindowTitle('License Key Entry')
-        self.setGeometry(300, 300, 400, 150)
+        self.license_key_input = None
+        self.init_ui()
+        self.license_server_url = "http://127.0.0.1:8000/verify/key"
 
-        # Create widgets
-        label = QLabel('Please enter license key:')
-        self.license_input = QLineEdit(self)
-        submit_button = QPushButton('Submit', self)
+    def init_ui(self):
+        # Set up the main layout
+        layout = QVBoxLayout()
 
-        # Connect the button click event to a custom function
-        submit_button.clicked.connect(self.on_submit)
-
-        # Layout setup
-        layout = QVBoxLayout(self)
-        layout.addWidget(label)
-        layout.addWidget(self.license_input)
-        layout.addWidget(submit_button)
-
-        # Apply some basic stylings
-        self.setStyleSheet(
-            "QWidget { background-color: #f0f0f0; }"
-            "QLabel { font-size: 14px; margin-bottom: 10px; }"
-            "QLineEdit { padding: 5px; font-size: 14px; }"
-            "QPushButton { padding: 8px; font-size: 14px; background-color: #4CAF50; color: white; border: none; }"
-            "QPushButton:hover { background-color: #45a049; }"
-        )
-
-    def on_submit(self):
-        # Retrieve the entered license key
-        license_key = self.license_input.text()
-        
-        # Perform some action with the license key (replace this with your logic)
-        print(f"License Key Entered: {license_key}")
-
-        # Open another window (replace SecondWindow with your second window class)
-        second_window = SecondWindow()
-        second_window.show()
-
-class SecondWindow(QWidget):
-    def __init__(self):
-        super().__init__()
-
-        self.setWindowTitle('Second Window')
-        self.setGeometry(400, 400, 400, 150)
-
-        # Create widgets for the second window
-        label = QLabel('This is the Second Window!')
-
-        # Layout setup
-        layout = QVBoxLayout(self)
+        # Label
+        label = QLabel('Please Enter License Key:')
+        label.setFont(QFont('Arial', 12))
         layout.addWidget(label)
 
-if __name__ == '__main__':
-    app = QApplication(sys.argv)
-    window = LicenseKeyWindow()
-    window.show()
-    sys.exit(app.exec_())
+        # Input field for license key
+        self.license_key_input = QLineEdit(self)
+        self.license_key_input.setFont(QFont('Arial', 12))
+        layout.addWidget(self.license_key_input)
+
+        # Verification Button
+        verify_button = QPushButton('Verify', self)
+        verify_button.clicked.connect(self.verify_license_key)
+        verify_button.setFont(QFont('Arial', 12))
+        verify_button.setStyleSheet('background-color: #4CAF50; color: white;')
+        layout.addWidget(verify_button)
+
+        # Set the layout for the main window
+        self.setLayout(layout)
+
+        # Set window properties
+        self.setWindowTitle('License Key Verification (Unverified)')
+        self.setGeometry(300, 300, 400, 200)
+
+    def verify_license_key(self):
+        db = SessionLocal()
+        license_key = self.license_key_input.text()
+        try:
+            server_response_token = server_verify_license_key.verify_license_key(self.license_server_url, license_key)
+            token_in_db = db.query(TokenModel).filter_by().first()
+            if token_in_db:
+                token = secure_crypto.decrypt(token_in_db.token)
+                print(token)
+            if not token_in_db:
+                encrypted_token = secure_crypto.encrypt(server_response_token)
+                print(encrypted_token)
+                token = TokenModel(token=encrypted_token)
+                print(token.token)
+                db.add(token)
+                db.commit()
+        except Exception as e:
+            self.show_error_message(str(e))
+
+
+    def show_error_message(self, message):
+        QMessageBox.critical(self, "Error", message)
