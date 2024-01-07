@@ -1,5 +1,6 @@
 import socket
 
+
 def check_internet_connection():
     remote_server = "www.google.com"
     port = 80
