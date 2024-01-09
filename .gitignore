@@ -157,3 +157,5 @@ cython_debug/
 *.explore.*
 .idea
 gui/game_config.yaml
+# Ignore all db files
+*.db
