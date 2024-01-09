@@ -4,7 +4,6 @@ from utils import verify_license_key as server_verify_license_key
 from models.token_model import TokenModel
 from database import SessionLocal
 from globals import secure_crypto
-from utils.token_manager import fetch_jwt_token
 
 
 
@@ -58,7 +57,6 @@ class LicenseKeyVerificationWidget(QWidget):
 
             encrypted_token = secure_crypto.encrypt(server_response_token)
             token = TokenModel(token=encrypted_token)
-            print(token.token)
             db.add(token)
             db.commit()
         except Exception as e:
