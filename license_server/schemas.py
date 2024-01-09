@@ -3,6 +3,7 @@ from models import LicenseTypeEnum
 from datetime import datetime
 from typing import Optional
 
+
 class LicenseKeySchema(BaseModel):
     license_key: str 
     license_type: LicenseTypeEnum
